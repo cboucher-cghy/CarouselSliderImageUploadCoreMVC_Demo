@@ -1,4 +1,4 @@
-# ASP.NET CORE MVC CURD OPERATION WITH IMAGE UPLOAD
+# ASP.NET CORE MVC CRUD OPERATION WITH IMAGE UPLOAD
 
 This demo application with explain you how you can upload image, edit image and delete image using ASP.NET Core MVC.
 

@@ -1,12 +1,8 @@
 ﻿using CarouselSliderImageUpload_Demo.Data;
 using CarouselSliderImageUpload_Demo.Models;
 using CarouselSliderImageUpload_Demo.ViewModels;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace CarouselSliderImageUpload_Demo.Controllers
 {
@@ -37,7 +33,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
             var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
             var carouselViewModel = new CarouselSliderViewModel()
             {
-                Id = carouselSlider.Id,
+                Id = carouselSlider!.Id,
                 ImageName = carouselSlider.ImageName,
                 Description = carouselSlider.Description,
                 ExistingImage = carouselSlider.ImagePath
@@ -56,13 +52,13 @@ namespace CarouselSliderImageUpload_Demo.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CarouselSliderViewModel model)
+        public async Task<IActionResult> Create(HomeCreateViewModel model)
         {
             if (ModelState.IsValid)
             {
                 string uniqueFileName = ProcessUploadedFile(model);
 
-                CarouselSlider carouselSlider = new CarouselSlider
+                CarouselSlider carouselSlider = new()
                 {
                     ImageName = model.ImageName,
                     ImagePath = uniqueFileName,
@@ -72,7 +68,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
                 await dbContext.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View();
+            return View(model);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -85,7 +81,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
             var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
             var carouselViewModel = new CarouselSliderViewModel()
             {
-                Id = carouselSlider.Id,
+                Id = carouselSlider!.Id,
                 ImageName = carouselSlider.ImageName,
                 Description = carouselSlider.Description,
                 ExistingImage = carouselSlider.ImagePath
@@ -105,7 +101,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
             if (ModelState.IsValid)
             {
                 var carouselSlider = await dbContext.CarouselSliders.FindAsync(model.Id);
-                carouselSlider.Description = model.Description;
+                carouselSlider!.Description = model.Description;
                 carouselSlider.ImageName = model.ImageName;
 
                 if (model.Image != null)
@@ -135,7 +131,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
             var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
             var carouselViewModel = new CarouselSliderViewModel()
             {
-                Id = carouselSlider.Id,
+                Id = carouselSlider!.Id,
                 ImageName = carouselSlider.ImageName,
                 Description = carouselSlider.Description,
                 ExistingImage = carouselSlider.ImagePath
@@ -153,7 +149,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
-            var CurrentImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", carouselSlider.ImagePath);
+            var CurrentImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", carouselSlider!.ImagePath);
             dbContext.CarouselSliders.Remove(carouselSlider);
             if (await dbContext.SaveChangesAsync() > 0)
             {
@@ -166,19 +162,17 @@ namespace CarouselSliderImageUpload_Demo.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private string ProcessUploadedFile(CarouselSliderViewModel model)
+        private string ProcessUploadedFile(UploadImage model)
         {
-            string uniqueFileName = null;
+            string uniqueFileName = "";
 
             if (model.Image != null)
             {
                 string uploadsFolder = Path.Combine(webHostEnvironment.WebRootPath, "images");
                 uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Image.FileName;
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    model.Image.CopyTo(fileStream);
-                }
+                using var fileStream = new FileStream(filePath, FileMode.Create);
+                model.Image.CopyTo(fileStream);
             }
 
             return uniqueFileName;
