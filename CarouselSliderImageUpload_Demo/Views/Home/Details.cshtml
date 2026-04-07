@@ -10,9 +10,11 @@
             <h4>Details</h4>
         </div>
         <div class="card-body">
-
-            <img src="@Url.Content("~/Images/avengers_endgame.jpg") />
-            <img src="@Url.Content(@Model.ImageName)" />
+            Type 1
+            <img src='@Url.Content("images/624fea82-fb5f-4274-a28f-bf81efaafc66_KEURIG.jpg")'   />
+<br>        Type 2
+            <img height="100" width="100"  src='@Url.Content($"~/images/{@Model.ExistingImage}")' />
+<br>
             <dl class="row">
                 <dt class="col-sm-2">
                     @Html.DisplayNameFor(model => model.ImageName)
