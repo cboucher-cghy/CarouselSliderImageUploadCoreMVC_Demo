@@ -1,4 +1,5 @@
 using CarouselSliderImageUpload_Demo.Data;
+using CarouselSliderImageUpload_Demo.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,8 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                options.UseSqlServer(
                    builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<CarouselSliderService>();
 
 builder.Services.AddControllersWithViews();
 
@@ -37,6 +40,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseAntiforgery();
 
 app.MapControllerRoute(
         name: "default",

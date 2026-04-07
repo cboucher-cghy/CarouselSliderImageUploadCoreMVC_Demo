@@ -1,48 +1,44 @@
-﻿using CarouselSliderImageUpload_Demo.Data;
 using CarouselSliderImageUpload_Demo.Models;
+using CarouselSliderImageUpload_Demo.Services;
 using CarouselSliderImageUpload_Demo.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CarouselSliderImageUpload_Demo.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly CarouselSliderService carouselSliderService;
         private readonly IWebHostEnvironment webHostEnvironment;
 
-        public HomeController(ApplicationDbContext context, IWebHostEnvironment hostEnvironment)
+        public HomeController(CarouselSliderService service, IWebHostEnvironment hostEnvironment)
         {
-            dbContext = context;
+            carouselSliderService = service;
             webHostEnvironment = hostEnvironment;
         }
 
         public async Task<IActionResult> Index()
         {
-            var carouselSlider = await dbContext.CarouselSliders.ToListAsync();
+            var carouselSlider = await carouselSliderService.GetAllAsync();
             return View(carouselSlider);
         }
 
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
-            var carouselViewModel = new CarouselSliderViewModel()
-            {
-                Id = carouselSlider!.Id,
-                ImageName = carouselSlider.ImageName,
-                Description = carouselSlider.Description,
-                ExistingImage = carouselSlider.ImagePath
-            };
+            var carouselSlider = await carouselSliderService.GetByIdAsync(id);
 
             if (carouselSlider == null)
             {
                 return NotFound();
             }
+
+            var carouselViewModel = new CarouselSliderViewModel()
+            {
+                Id = carouselSlider.Id,
+                ImageName = carouselSlider.ImageName,
+                Description = carouselSlider.Description,
+                ExistingImage = carouselSlider.ImagePath
+            };
+
             return View(carouselViewModel);
         }
 
@@ -64,8 +60,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
                     ImagePath = uniqueFileName,
                     Description = model.Description
                 };
-                dbContext.Add(carouselSlider);
-                await dbContext.SaveChangesAsync();
+                await carouselSliderService.CreateAsync(carouselSlider);
                 return RedirectToAction(nameof(Index));
             }
             return View(model);
@@ -73,24 +68,21 @@ namespace CarouselSliderImageUpload_Demo.Controllers
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
-            var carouselViewModel = new CarouselSliderViewModel()
-            {
-                Id = carouselSlider!.Id,
-                ImageName = carouselSlider.ImageName,
-                Description = carouselSlider.Description,
-                ExistingImage = carouselSlider.ImagePath
-            };
+            var carouselSlider = await carouselSliderService.GetByIdAsync(id);
 
             if (carouselSlider == null)
             {
                 return NotFound();
             }
+
+            var carouselViewModel = new CarouselSliderViewModel()
+            {
+                Id = carouselSlider.Id,
+                ImageName = carouselSlider.ImageName,
+                Description = carouselSlider.Description,
+                ExistingImage = carouselSlider.ImagePath
+            };
+
             return View(carouselViewModel);
         }
 
@@ -100,7 +92,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
         {
             if (ModelState.IsValid)
             {
-                var carouselSlider = await dbContext.CarouselSliders.FindAsync(model.Id);
+                var carouselSlider = await carouselSliderService.GetByIdAsync(model.Id);
                 carouselSlider!.Description = model.Description;
                 carouselSlider.ImageName = model.ImageName;
 
@@ -114,8 +106,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
 
                     carouselSlider.ImagePath = ProcessUploadedFile(model);
                 }
-                dbContext.Update(carouselSlider);
-                await dbContext.SaveChangesAsync();
+                await carouselSliderService.UpdateAsync(carouselSlider);
                 return RedirectToAction(nameof(Index));
             }
             return View();
@@ -123,24 +114,21 @@ namespace CarouselSliderImageUpload_Demo.Controllers
 
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
-            var carouselViewModel = new CarouselSliderViewModel()
-            {
-                Id = carouselSlider!.Id,
-                ImageName = carouselSlider.ImageName,
-                Description = carouselSlider.Description,
-                ExistingImage = carouselSlider.ImagePath
-            };
+            var carouselSlider = await carouselSliderService.GetByIdAsync(id);
 
             if (carouselSlider == null)
             {
                 return NotFound();
             }
+
+            var carouselViewModel = new CarouselSliderViewModel()
+            {
+                Id = carouselSlider.Id,
+                ImageName = carouselSlider.ImageName,
+                Description = carouselSlider.Description,
+                ExistingImage = carouselSlider.ImagePath
+            };
+
             return View(carouselViewModel);
         }
 
@@ -148,10 +136,10 @@ namespace CarouselSliderImageUpload_Demo.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var carouselSlider = await dbContext.CarouselSliders.FindAsync(id);
+            var carouselSlider = await carouselSliderService.GetByIdAsync(id);
             var CurrentImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\images", carouselSlider!.ImagePath);
-            dbContext.CarouselSliders.Remove(carouselSlider);
-            if (await dbContext.SaveChangesAsync() > 0)
+
+            if (await carouselSliderService.DeleteAsync(id))
             {
                 if (System.IO.File.Exists(CurrentImage))
                 {
