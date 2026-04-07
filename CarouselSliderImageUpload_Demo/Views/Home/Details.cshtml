@@ -10,11 +10,6 @@
             <h4>Details</h4>
         </div>
         <div class="card-body">
-            Type 1
-            <img src='@Url.Content("images/624fea82-fb5f-4274-a28f-bf81efaafc66_KEURIG.jpg")'   />
-<br>        Type 2
-            <img height="100" width="100"  src='@Url.Content($"~/images/{@Model.ExistingImage}")' />
-<br>
             <dl class="row">
                 <dt class="col-sm-2">
                     @Html.DisplayNameFor(model => model.ImageName)
@@ -26,7 +21,11 @@
                     @Html.DisplayNameFor(model => model.ImageName)
                 </dt>
                 <dd class="col-sm-10">
-                    <img src="~/images/@Model.ExistingImage" class="img-thumbnail" height="100" width="100" asp-append-version="true" />
+                    <img height="100" width="100" src='@Url.Content($"/images/{@Model.ExistingImage}")' />
+                    <!-- Autre méthode possible-->
+                    <!--
+                        <img src="~/images/@Model.ExistingImage" class="img-thumbnail" height="100" width="100" asp-append-version="true" />
+                    -->
                 </dd>
                 <dt class="col-sm-2">
                     @Html.DisplayNameFor(model => model.Description)
