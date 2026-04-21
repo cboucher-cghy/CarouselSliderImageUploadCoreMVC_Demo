@@ -157,7 +157,7 @@ namespace CarouselSliderImageUpload_Demo.Controllers
             if (model.Image != null)
             {
                 string uploadsFolder = Path.Combine(webHostEnvironment.WebRootPath, "images");
-                uniqueFileName = Guid.NewGuid().ToString() + "_" + model.Image.FileName;
+                uniqueFileName = Guid.CreateVersion7().ToString() + "_" + model.Image.FileName;
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
                 using var fileStream = new FileStream(filePath, FileMode.Create);
                 model.Image.CopyTo(fileStream);
